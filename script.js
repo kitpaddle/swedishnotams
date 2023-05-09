@@ -107,7 +107,7 @@ async function fetchData() {
     let hours = now.getHours().toString().padStart(2, '0');
     let minutes = now.getMinutes().toString().padStart(2, '0');
     let timeString = `${day} ${month} ${hours}:${minutes}`;
-    document.getElementById('info').innerHTML = 'Swedish Notams Map - Showing all currently active NOTAMs. Last updated: '+timeString+' (local time)';
+    document.getElementById('info').innerHTML = 'Swedish Notams Map - All published NOTAMs. <i>Last updated: '+timeString+'</i>';
 
   } catch (error) {
     console.log(error);
