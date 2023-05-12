@@ -84,7 +84,7 @@ const glitchURL = "https://tar-piquant-foe.glitch.me/notams";
 async function fetchData() {
   try {
     console.log("Fetching data");
-    const response1 = await fetch(replitURL);
+    const response1 = await fetch(glitchURL);
     const data1 = await response1.json();
     
     const response2 = await fetch("https://raw.githubusercontent.com/kitpaddle/hosting/main/swedishairports.json");
