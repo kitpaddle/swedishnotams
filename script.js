@@ -80,11 +80,12 @@ panelLayers.addTo(map);
 // Two different sources for express server with notams data
 const replitURL = "https://notaminterpreter.kitpaddle.repl.co/notams";
 const glitchURL = "https://tar-piquant-foe.glitch.me/notams";
+const serverURL = "https://91.128.166.133/notams";
 
 async function fetchData() {
   try {
     console.log("Fetching data");
-    const response1 = await fetch(glitchURL);
+    const response1 = await fetch(serverhURL);
     const data1 = await response1.json();
     
     const response2 = await fetch("https://raw.githubusercontent.com/kitpaddle/hosting/main/swedishairports.json");
