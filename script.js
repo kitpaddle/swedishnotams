@@ -80,7 +80,7 @@ panelLayers.addTo(map);
 // Two different sources for express server with notams data
 const replitURL = "https://notaminterpreter.kitpaddle.repl.co/notams";
 const glitchURL = "https://tar-piquant-foe.glitch.me/notams";
-const serverURL = "https://91.128.166.133:80/notams";
+const serverURL = "https://91.128.166.133/notams";
 
 async function fetchData() {
   try {
