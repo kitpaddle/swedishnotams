@@ -85,11 +85,13 @@ const serverURL = "https://zenozyne.com/notams";
 async function fetchData() {
   try {
     console.log("Fetching data");
-    const response1 = await fetch(serverURL);
-    const data1 = await response1.json();
+    const response1 = await axios.get(serverURL);
+    document.getElementById('stattime').innerHTML = 'Loading NOTAMS...';
+    const data1 = await response1.data;
     
-    const response2 = await fetch("https://raw.githubusercontent.com/kitpaddle/hosting/main/swedishairports.json");
-    const data2 = await response2.json();
+    const response2 = await axios.get("https://raw.githubusercontent.com/kitpaddle/hosting/main/swedishairports.json");
+    document.getElementById('stattime').innerHTML = 'Loading Airports...';
+    const data2 = await response2.data;
     // Save data in local variables
     notamData = data1;
     airports = data2;
@@ -108,7 +110,7 @@ async function fetchData() {
     let hours = now.getHours().toString().padStart(2, '0');
     let minutes = now.getMinutes().toString().padStart(2, '0');
     let timeString = `${day} ${month} ${hours}:${minutes}`;
-    document.getElementById('info').innerHTML = 'Swedish Notams Map - All published NOTAMs. <i>Last updated: '+timeString+'</i>';
+    document.getElementById('stattime').innerHTML = 'Updated: '+timeString;
 
   } catch (error) {
     console.log(error);
@@ -119,7 +121,8 @@ async function fetchData() {
 fetchData();
 
 function drawAirportsData(){
-  
+  let statactive = 0;
+  let nrofnotams = 0;
   // Loop through the notams
   notamData.forEach((notamgroup) => {
     
@@ -144,6 +147,7 @@ function drawAirportsData(){
     html += '</div>';
     html += '<div class="notamcontainer notamheader"><div class="item-id"><b>NOTAM ID</b></div><div class="item-from"><b>FROM:</b></div><div class="item-to"><b>TO:</b></div></div>';
     for(let i=0; i<notamgroup.notams.length;i++){
+      nrofnotams++;
       let statuscolor = "lightgrey";
       if(new Date(notamgroup.notams[i].from) < new Date()){ statuscolor = "#f9c666"}
       
@@ -173,12 +177,15 @@ function drawAirportsData(){
       let activeMarker = L.circleMarker(notamgroup.position, {radius: 9, color: '#f9c666',fillColor: '#f9c666', fillOpacity: 0.3}).addTo(airportsLayer);
       activeMarker.bindTooltip(tthtml);
       activeMarker.bindPopup(html);
+      statactive++;
     }else{
       let inactiveMarker = L.circleMarker(notamgroup.position, {radius: 5, color: '#808080', fillColor: '#808080', fillOpacity: 0.4, opacity: 0.6} ).addTo(airportsLayer);
       inactiveMarker.bindTooltip(tthtml);
     }
 
   })
+  document.getElementById('statnotam').innerHTML = nrofnotams+' Notams';
+  document.getElementById('statfield').innerHTML = statactive+'/180 airfields';
   airportsLayer.addTo(map); // Making the layer visible by default
   
   //let uniqueTypes = [...new Set(notamData.map(obj => obj.type))];
@@ -192,3 +199,6 @@ map.on('click', function(e) {
   console.log("Clicked at: " + e.latlng.lat + ", " + e.latlng.lng);
 });
 */
+/*
+document.getElementById("myButton").addEventListener("click", myFunction);
+}*/
