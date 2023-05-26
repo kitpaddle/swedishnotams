@@ -16,6 +16,11 @@ window.addEventListener('resize', function(event) {
 
 let airports;
 let notamData;
+let metarData;
+
+let greyRadius = 5;
+let notamRadius = 9;
+let metarRadius = 12;
 
 //// JS RELATED TO MAP / LEAFLET
 
@@ -66,43 +71,67 @@ const baseMaps = {
 };
 // Creating layergroups for overlay and control
 let airportsLayer = L.layerGroup();
+let metarLayer = L.layerGroup();
+
 
 const overlayMaps = {
-  "Airfield NOTAMs":  airportsLayer
+  "Airfield NOTAMs":  airportsLayer,
+  "METARs": metarLayer
 }
 
 // Create control with layerGroups
-let panelLayers = new L.control.layers(baseMaps, overlayMaps);
-// Add control AND layers to map
-panelLayers.addTo(map);
+L.control.layers(baseMaps, overlayMaps, {collapsed: false}).addTo(map);
+// Draw one layer always on top
+map.on("overlayadd", function (event) {
+	airportsLayer.eachLayer(function (l) {
+      l.bringToFront();
+  });
+});
+
+function isMobileDevice() {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
+
+// Usage example
+if (isMobileDevice()) {
+  greyRadius = 10;
+  notamRadius = 18;
+  metarRadius = 21;
+  console.log("You are on a mobile device (phone or tablet).");
+} else {
+  console.log("You are not on a mobile device (desktop or laptop).");
+}
 
 /// FETCH DATA for airports
 // Two different sources for express server with notams data
 const replitURL = "https://notaminterpreter.kitpaddle.repl.co/notams";
+const replitMetarURL = "https://notaminterpreter.kitpaddle.repl.co/metars";
 const glitchURL = "https://tar-piquant-foe.glitch.me/notams";
 const serverURL = "https://zenozyne.com/notams";
+const serverMetarURL = "https://zenozyne.com/metars";
 
 async function fetchData() {
   try {
     console.log("Fetching data");
-    const response1 = await axios.get(serverURL);
+    const request1 = axios.get(serverURL);
     document.getElementById('stattime').innerHTML = 'Loading NOTAMS...';
-    const data1 = await response1.data;
+    const request2 = axios.get("https://raw.githubusercontent.com/kitpaddle/hosting/main/swedishairports.json");
+    document.getElementById('stattime').innerHTML = 'Loading NOTAMS...';
+    const request3 = axios.get(replitMetarURL);
     
-    const response2 = await axios.get("https://raw.githubusercontent.com/kitpaddle/hosting/main/swedishairports.json");
-    document.getElementById('stattime').innerHTML = 'Loading Airports...';
-    const data2 = await response2.data;
+    // Wait for both requests to complete
+    const responses = await Promise.all([request1, request2, request3]);
+
+    // Both requests have completed successfully
     // Save data in local variables
-    notamData = data1;
-    airports = data2;
+    notamData = responses[0].data;
+    airports = responses[1].data;
+    metarData = responses[2].data
     
     console.log("Data Fetched successfully: "+notamData.length+" aerodromes received");
-    // Sort NOTAM data so all notams are in chronologial order 
-    notamData.forEach(notamgroup =>{
-
-    })
                 
     drawAirportsData(); // Call drawing of data onto map
+    drawMetarData();
     
     let now = new Date();
     let day = now.getDate();
@@ -121,12 +150,13 @@ async function fetchData() {
 fetchData();
 
 function drawAirportsData(){
-  let statactive = 0;
-  let nrofnotams = 0;
+  let statactive = 0; //Local variable for statistics
+  let nrofnotams = 0; //Local variables for statistics
   // Loop through the notams
   notamData.forEach((notamgroup) => {
     
     if (Array.isArray(notamgroup.notams)) {
+      // Sort NOTAM data so all notams are in chronologial order 
       notamgroup.notams.sort((a, b) => new Date(a.from) - new Date(b.from));
     }
     
@@ -138,12 +168,20 @@ function drawAirportsData(){
       notamgroup.position = [61.2,19.9];
       notFound.push(notamgroup);
     }
-    
+                      
     let html = "<style> div.leaflet-popup-content {width:auto !important;}</style>"; //Resize popup auto for grid/flex
     html += '<div class="tooltipcontainer">';
     html += '<div class="tooltipheader">';
     html += '<div><b>'+notamgroup.name + " (" + notamgroup.icao +")</b></div>";
     html += "<div>Nr of published NOTAMs: "+notamgroup.notams.length+"</div>";
+    
+    metarData.forEach( metar => {
+      if (notamgroup.icao == metar.icao){
+        html += '<div><b><br>METAR</b></div>';
+        html += '<div>'+metar.metar+'</div>';
+      }
+    });
+    
     html += '</div>';
     html += '<div class="notamcontainer notamheader"><div class="item-id"><b>NOTAM ID</b></div><div class="item-from"><b>FROM:</b></div><div class="item-to"><b>TO:</b></div></div>';
     for(let i=0; i<notamgroup.notams.length;i++){
@@ -187,10 +225,27 @@ function drawAirportsData(){
   document.getElementById('statnotam').innerHTML = nrofnotams+' Notams';
   document.getElementById('statfield').innerHTML = statactive+'/180 airfields';
   airportsLayer.addTo(map); // Making the layer visible by default
-  
+
   //let uniqueTypes = [...new Set(notamData.map(obj => obj.type))];
   //console.log(uniqueTypes);
 
+}
+
+function drawMetarData(){
+  metarData.forEach( metar => {
+    let matchObj = airports.find( airport => metar.icao == airport.ident);
+    if (matchObj){
+      metar.position = [parseFloat(matchObj.latitude_deg), parseFloat(matchObj.longitude_deg)];
+    }
+    
+    let tthtml = '<div class="popupcontainer">';
+    tthtml += '<div><b>'+metar.icao +"</b></div>";
+    tthtml += "<div>METAR: "+metar.metar+"</div></div>";
+
+    let activeMarker = L.circleMarker(metar.position, {radius: 12, color: '#3a9bdc',fillColor: '#3a9bdc', fillOpacity: 0.3}).addTo(metarLayer);
+    //activeMarker.bindTooltip(html);
+    activeMarker.bindPopup(tthtml);    
+  })
 }
 
 /*
@@ -202,3 +257,4 @@ map.on('click', function(e) {
 /*
 document.getElementById("myButton").addEventListener("click", myFunction);
 }*/
+
