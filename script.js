@@ -117,7 +117,7 @@ async function fetchData() {
     document.getElementById('stattime').innerHTML = 'Loading NOTAMS...';
     const request2 = axios.get("https://raw.githubusercontent.com/kitpaddle/hosting/main/swedishairports.json");
     document.getElementById('stattime').innerHTML = 'Loading NOTAMS...';
-    const request3 = axios.get(replitMetarURL);
+    const request3 = axios.get(serverMetarURL);
     
     // Wait for both requests to complete
     const responses = await Promise.all([request1, request2, request3]);
