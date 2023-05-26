@@ -129,9 +129,10 @@ async function fetchData() {
     metarData = responses[2].data
     
     console.log("Data Fetched successfully: "+notamData.length+" aerodromes received");
-                
+             
+    drawMetarData();  
     drawAirportsData(); // Call drawing of data onto map
-    drawMetarData();
+    
     
     let now = new Date();
     let day = now.getDate();
