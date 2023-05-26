@@ -126,8 +126,9 @@ async function fetchData() {
     // Save data in local variables
     notamData = responses[0].data;
     airports = responses[1].data;
-    metarData = responses[2].data
-    
+    metarData = responses[2].data;
+    metarData.shift(); // Remove first item in array as it's not a METAR (should fix it in server-side)
+	  
     console.log("Data Fetched successfully: "+notamData.length+" aerodromes received");
              
     drawMetarData();  
