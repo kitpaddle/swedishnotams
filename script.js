@@ -107,8 +107,8 @@ if (isMobileDevice()) {
 const replitURL = "https://notaminterpreter.kitpaddle.repl.co/notams";
 const replitMetarURL = "https://notaminterpreter.kitpaddle.repl.co/metars";
 const glitchURL = "https://tar-piquant-foe.glitch.me/notams";
-const serverURL = "https://zenozyne.com/notams";
-const serverMetarURL = "https://zenozyne.com/metars";
+const serverURL = "https://zenozyne.ddns.net/notams";
+const serverMetarURL = "https://zenozyne.ddns.net/metars";
 
 async function fetchData() {
   try {
