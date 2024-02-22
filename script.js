@@ -166,9 +166,9 @@ function drawAirportsData(){
     if (matchObj){
       notamgroup.position = [parseFloat(matchObj.latitude_deg), parseFloat(matchObj.longitude_deg)];
       notamgroup.type = matchObj.type
-    }else{
-      notamgroup.position = [61.2,19.9];
-      notFound.push(notamgroup);
+    }else{ //
+      notamgroup.position = [0,0];
+      //notFound.push(notamgroup);
     }
                       
     let html = "<style> div.leaflet-popup-content {width:auto !important;}</style>"; //Resize popup auto for grid/flex
